@@ -37,7 +37,9 @@ USERINCLUDE     += \
 # Needed to be compatible with the O= option
 LINUXINCLUDE    += \
                 -I$(srctree)/techpack/sec-camera/include/uapi \
-                -I$(srctree)/techpack/sec-camera/include
+                -I$(srctree)/techpack/sec-camera/include \
+                -I$(srctree)/techpack/sec-camera/drivers/cam_sensor_module/cam_cci \
+                -I$(srctree)/techpack/sec-camera/drivers/cam_req_mgr
 obj-y += drivers/
 else
 $(info Target not found)
