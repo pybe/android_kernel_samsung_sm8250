@@ -117,7 +117,7 @@ TRACE_EVENT(out_data_block_message,
 #endif
 
 #undef TRACE_INCLUDE_PATH
-#define TRACE_INCLUDE_PATH	.
+#define TRACE_INCLUDE_PATH ../../sound/firewire/motu
 #undef TRACE_INCLUDE_FILE
 #define TRACE_INCLUDE_FILE	amdtp-motu-trace
 #include <trace/define_trace.h>

@@ -28,7 +28,7 @@ TRACE_EVENT(bpf_trace_printk,
 #endif /* _TRACE_BPF_TRACE_H */
 
 #undef TRACE_INCLUDE_PATH
-#define TRACE_INCLUDE_PATH .
+#define TRACE_INCLUDE_PATH ../../kernel/trace
 #define TRACE_INCLUDE_FILE bpf_trace
 
 #include <trace/define_trace.h>

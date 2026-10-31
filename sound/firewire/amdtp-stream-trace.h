@@ -192,7 +192,7 @@ TRACE_EVENT(out_packet_without_header,
 #endif
 
 #undef TRACE_INCLUDE_PATH
-#define TRACE_INCLUDE_PATH	.
+#define TRACE_INCLUDE_PATH ../../sound/firewire
 #undef TRACE_INCLUDE_FILE
 #define TRACE_INCLUDE_FILE	amdtp-stream-trace
 #include <trace/define_trace.h>
