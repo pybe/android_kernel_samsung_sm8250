@@ -838,11 +838,11 @@ int sock_setsockopt(struct socket *sock, int level, int optname,
 	#ifdef CONFIG_KNOX_NCM
 	// SEC_PRODUCT_FEATURE_KNOX_SUPPORT_NPA {
 	if (optname == SO_SET_DOMAIN_NAME)
-		return sock_set_domain_name(sk, optval, optlen);
+		return sock_set_domain_name(sk, optval.user, optlen);
 	if (optname == SO_SET_DNS_UID)
-		return sock_set_dns_uid(sk, optval, optlen);
+		return sock_set_dns_uid(sk, optval.user, optlen);
 	if (optname == SO_SET_DNS_PID)
-		return sock_set_dns_pid(sk, optval, optlen);
+		return sock_set_dns_pid(sk, optval.user, optlen);
 	// SEC_PRODUCT_FEATURE_KNOX_SUPPORT_NPA }
 	#endif
 	if (optlen < sizeof(int))
