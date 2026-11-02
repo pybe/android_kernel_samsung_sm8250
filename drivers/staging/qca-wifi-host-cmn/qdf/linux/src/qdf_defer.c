@@ -34,6 +34,19 @@
  *
  * Return: none
  */
+void __qdf_bh_thunk(unsigned long data)
+{
+	__qdf_bh_t *bh = (__qdf_bh_t *)data;
+
+	if (!bh->fn) {
+		QDF_TRACE(QDF_MODULE_ID_QDF, QDF_TRACE_LEVEL_ERROR,
+			  "No bh callback registered !!");
+		return;
+	}
+	bh->fn(bh->arg);
+}
+qdf_export_symbol(__qdf_bh_thunk);
+
 void __qdf_defer_func(struct work_struct *work)
 {
 	__qdf_work_t *ctx = container_of(work, __qdf_work_t, work);

@@ -30,7 +30,14 @@
 #include <qdf_status.h>
 #include <qdf_trace.h>
 
-typedef struct tasklet_struct __qdf_bh_t;
+struct __qdf_bh {
+	struct tasklet_struct tasklet;
+	qdf_defer_fn_t fn;
+	void *arg;
+};
+typedef struct __qdf_bh __qdf_bh_t;
+
+void __qdf_bh_thunk(unsigned long data);
 typedef struct workqueue_struct __qdf_workqueue_t;
 
 /**
@@ -47,7 +54,6 @@ typedef struct {
 
 extern void __qdf_defer_func(struct work_struct *work);
 
-typedef void (*__qdf_bh_fn_t)(unsigned long arg);
 
 /**
  * __qdf_init_work - Initialize a work/task queue, This runs in non-interrupt
@@ -187,9 +193,11 @@ static inline void __qdf_destroy_workqueue(__qdf_workqueue_t *wqueue)
  * Return: none
  */
 static inline QDF_STATUS
-__qdf_init_bh(struct tasklet_struct *bh, qdf_defer_fn_t func, void *arg)
+__qdf_init_bh(__qdf_bh_t *bh, qdf_defer_fn_t func, void *arg)
 {
-	tasklet_init(bh, (__qdf_bh_fn_t) func, (unsigned long)arg);
+	bh->fn = func;
+	bh->arg = arg;
+	tasklet_init(&bh->tasklet, __qdf_bh_thunk, (unsigned long)bh);
 	return QDF_STATUS_SUCCESS;
 }
 
@@ -198,9 +206,9 @@ __qdf_init_bh(struct tasklet_struct *bh, qdf_defer_fn_t func, void *arg)
  * @bh: pointer to bottom
  * Return: none
  */
-static inline QDF_STATUS __qdf_sched_bh(struct tasklet_struct *bh)
+static inline QDF_STATUS __qdf_sched_bh(__qdf_bh_t *bh)
 {
-	tasklet_schedule(bh);
+	tasklet_schedule(&bh->tasklet);
 	return QDF_STATUS_SUCCESS;
 }
 
@@ -222,9 +230,9 @@ static inline QDF_STATUS __qdf_disable_work(__qdf_work_t *work)
  * @bh: pointer to bottom
  * Return: none
  */
-static inline QDF_STATUS __qdf_disable_bh(struct tasklet_struct *bh)
+static inline QDF_STATUS __qdf_disable_bh(__qdf_bh_t *bh)
 {
-	tasklet_kill(bh);
+	tasklet_kill(&bh->tasklet);
 	return QDF_STATUS_SUCCESS;
 }
 

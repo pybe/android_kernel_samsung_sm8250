@@ -34,13 +34,28 @@
 #include <linux/delay.h>
 #include <linux/interrupt.h>
 #include <linux/kthread.h>
+#include <linux/slab.h>
 #include <linux/stacktrace.h>
 #include <qdf_defer.h>
 #include <qdf_module.h>
 
 /* Function declarations and documenation */
 
-typedef int (*qdf_thread_os_func)(void *data);
+struct qdf_thread_run_ctx {
+	qdf_thread_func callback;
+	void *context;
+};
+
+static int qdf_thread_run_thunk(void *data)
+{
+	struct qdf_thread_run_ctx *ctx = data;
+	QDF_STATUS status = QDF_STATUS_SUCCESS;
+
+	if (ctx->callback)
+		status = ctx->callback(ctx->context);
+	kfree(ctx);
+	return (int)status;
+}
 
 /**
  *  qdf_sleep() - sleep
@@ -143,12 +158,21 @@ static uint16_t qdf_thread_id;
 
 qdf_thread_t *qdf_thread_run(qdf_thread_func callback, void *context)
 {
+	struct qdf_thread_run_ctx *ctx;
 	struct task_struct *thread;
 
-	thread = kthread_create((qdf_thread_os_func)callback, context,
-				"qdf %u", qdf_thread_id++);
-	if (IS_ERR(thread))
+	ctx = kmalloc(sizeof(*ctx), GFP_KERNEL);
+	if (!ctx)
 		return NULL;
+	ctx->callback = callback;
+	ctx->context = context;
+
+	thread = kthread_create(qdf_thread_run_thunk, ctx,
+				"qdf %u", qdf_thread_id++);
+	if (IS_ERR(thread)) {
+		kfree(ctx);
+		return NULL;
+	}
 
 	get_task_struct(thread);
 	wake_up_process(thread);
